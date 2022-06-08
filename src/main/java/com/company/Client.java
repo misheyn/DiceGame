@@ -19,22 +19,20 @@ public class Client extends Thread {
         port = _port;
         timer = new Timer();
     }
-    
 
     public void update() {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if (/*!sendFlag && */!closeFlag /*&& VirusApplication.getInstance().initFlag && !VirusApplication.getInstance().finishGameFlag && VirusApplication.getInstance().moveStatus != VirusApplication.getInstance().clientKind*/) {
-//                    System.out.println("get move action");
+                if (!closeFlag/* && Game.getInstance().initFlag && !Game.getInstance().winFlag*/) {
                     try {
-                        if (clientFlag) {
-//                            System.out.println("clientflag true");
-                            getClientCount();
-                        }
-//                        getMove();
+                        if (clientFlag) getClientCount();
+                        if (getBankerMoveFlag) getBankerMove();
+                        if (getPonterMoveFlag) getPonterMove();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -46,9 +44,18 @@ public class Client extends Thread {
             oos.writeUTF("quit");
             oos.close();
             closeFlag = true;
-//            readyFlag = false;
             System.out.println("Closing connections & channels on clientSide - DONE.");
         }
+    }
+
+    public String getPartnerName() throws IOException {
+        String name = null;
+        if (!closeFlag) {
+            oos.writeUTF("getPartnerName");
+            oos.reset();
+            name = ois.readUTF();
+        }
+        return name;
     }
 
     public void getClientCount() throws IOException {
@@ -56,17 +63,79 @@ public class Client extends Thread {
             oos.writeUTF("getClientCount");
             oos.reset();
             int clientCount = Integer.parseInt(ois.readUTF());
-            System.out.println("client count " + clientCount);
+//            System.out.println("client count " + clientCount);
             if (clientCount == 2) {
                 clientFlag = false;
                 StartMenu.getInstance().menuController.getStartButton().setDisable(false);
                 clientType = getClientType();
+                String partnerName = getPartnerName();
                 if (clientType.equals("Ponter")) {
-                    System.out.println("Ponter");
+//                    System.out.println("Ponter");
+                    Game.getInstance().clientType = PlayerType.Ponter;
                     Game.getInstance().addPlayer(StartMenu.getInstance().menuController.getLoginText(), PlayerType.Ponter);
+                    Game.getInstance().addPlayer(partnerName, PlayerType.Banker);
                 }
-                else Game.getInstance().addPlayer(StartMenu.getInstance().menuController.getLoginText(), PlayerType.Banker);
+                else {
+                    Game.getInstance().clientType = PlayerType.Banker;
+                    Game.getInstance().addPlayer(StartMenu.getInstance().menuController.getLoginText(), PlayerType.Banker);
+                    Game.getInstance().addPlayer(partnerName, PlayerType.Ponter);
+                }
+                Game.getInstance().mainController.initType();
                 System.out.println(clientType);
+            }
+        }
+    }
+
+    public void sendPonterMove(int bet) throws IOException {
+        if (!closeFlag) {
+            System.out.println("sendPonterMove");
+            oos.writeUTF("sendPonterMove");
+            oos.writeUTF(Integer.toString(bet));
+            oos.reset();
+        }
+    }
+
+    public void getPonterMove() throws IOException {
+        if (!closeFlag) {
+            System.out.println("getPonterMove");
+            oos.writeUTF("getPonterMove");
+            oos.reset();
+            int bet = Integer.parseInt(ois.readUTF());
+            if (bet != 0) {
+                getPonterMoveFlag = false;
+                System.out.println("get ponter right move");
+                Game.getInstance().mainController.ponterAction(bet);
+            }
+        }
+    }
+
+    public void sendBankerMove() throws IOException {
+        if (!closeFlag) {
+            System.out.println("sendBankerMove");
+            oos.writeUTF("sendBankerMove");
+            oos.writeUTF(Integer.toString(Game.getInstance().num1));
+            oos.writeUTF(Integer.toString(Game.getInstance().num2));
+            oos.writeUTF(Integer.toString(Game.getInstance().num3));
+            oos.reset();
+        }
+    }
+
+    public void getBankerMove() throws Exception {
+        int[] num = new int[3];
+        if (!closeFlag) {
+            System.out.println("getBankerMove");
+            oos.writeUTF("getBankerMove");
+            oos.reset();
+            for (int i = 0; i < 3; ++i) {
+                num[i] = Integer.parseInt(ois.readUTF());
+            }
+            if (num[0] != 0 && num[1] != 0 && num[2] != 0) {
+                getBankerMoveFlag = false;
+                System.out.println("get banker right move");
+                Game.getInstance().num1 = num[0];
+                Game.getInstance().num2 = num[1];
+                Game.getInstance().num3 = num[2];
+                Game.getInstance().mainController.bankerAction();
             }
         }
     }
@@ -74,14 +143,9 @@ public class Client extends Thread {
     public String getClientType() throws IOException {
         String type = null;
         if (!closeFlag) {
-//            oos = new ObjectOutputStream(socket.getOutputStream());
-//            oos.reset();
-//            System.out.println("getClientType");
             oos.writeUTF("getClientType");
             oos.reset();
             type = ois.readUTF();
-//            System.out.println(type);
-//            System.out.println("client count " + clientCount);
         }
         return type;
     }
@@ -97,7 +161,6 @@ public class Client extends Thread {
                 System.out.println("Client connected to socket.");
                 oos.writeUTF(login);
                 oos.reset();
-//                readyFlag = true;
                 update();
                 while (!socket.isClosed() && !closeFlag) {
                     Thread.sleep(1000); //todo timerTask
@@ -121,6 +184,7 @@ public class Client extends Thread {
         }
         return localInstance;
     }
+
     private static volatile Client instance;
     private final String login;
     private final String ip;
@@ -132,4 +196,6 @@ public class Client extends Thread {
     public boolean closeFlag = false;
     public boolean clientFlag = false;
     public String clientType = "";
+    public boolean getPonterMoveFlag = false;
+    public boolean getBankerMoveFlag = false;
 }

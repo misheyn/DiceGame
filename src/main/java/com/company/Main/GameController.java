@@ -1,5 +1,6 @@
 package com.company.Main;
 
+import com.company.Client;
 import com.company.Main.Game;
 import com.company.Player;
 import com.company.PlayerType;
@@ -16,6 +17,7 @@ import javafx.scene.layout.Pane;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +57,7 @@ public class GameController {
     private ImageView diceGif2;
     @FXML
     private ImageView diceGif3;
+
     @FXML
 
     public TextArea getPlayersTextArea() {
@@ -93,14 +96,27 @@ public class GameController {
         return betComboBox;
     }
 
-//    public void addPlayer(String name, PlayerType type) {
-//        Player player = new Player(name, type);
-//        Game.getInstance().playerHashMap.put(player.type, player);
-//        playersTextArea.appendText(name + "\n");
-//        scoreTextArea.appendText(player.score + "\n");
-//    }
+    private void subShowResultImage(int num, ImageView dice) throws FileNotFoundException {
+        String path = "src/image/dice_%d.png".formatted(num);
+        System.out.println("Path: " + path);
+        dice.setImage(new Image(new FileInputStream(path)));
+    }
+
+    public void showResultImage() throws FileNotFoundException {
+        subShowResultImage(Game.getInstance().num1, diceGif1);
+        subShowResultImage(Game.getInstance().num2, diceGif2);
+        subShowResultImage(Game.getInstance().num3, diceGif3);
+    }
+
     @FXML
     void clickPlayButton(ActionEvent event) throws Exception {
+        Game.getInstance().cubeRandomMove();
+        bankerAction();
+        Client.getInstance().sendBankerMove();
+        Client.getInstance().getPonterMoveFlag = true;
+    }
+
+    public void bankerAction() throws Exception {
         Game.getInstance().diceRoll();
         placeBetButton.setDisable(false);
         betComboBox.setDisable(false);
@@ -108,12 +124,37 @@ public class GameController {
     }
 
     @FXML
-    void clickPlaceBetButton(ActionEvent event) {
-        Game.getInstance().currentBet = betComboBox.getValue();
+    void clickPlaceBetButton(ActionEvent event) throws IOException {
+        ponterAction(betComboBox.getValue());
+        Client.getInstance().sendPonterMove(betComboBox.getValue());
+        Client.getInstance().getBankerMoveFlag = true;
+    }
+
+    public void ponterAction(int bet) {
+        Game.getInstance().currentBet = bet;
         placeBetButton.setDisable(true);
         betComboBox.setDisable(true);
         playButton.setDisable(false);
         turnTextField.setText("Banker turn");
+    }
+
+    public void restartView() {
+//        playersTextArea.setText("");
+//        scoreTextArea.setText("");
+        diceGif1.setVisible(false);
+        diceGif2.setVisible(false);
+        diceGif3.setVisible(false);
+        betComboBox.getSelectionModel().select(0);
+        roundTextField.setText("Round " + Game.getInstance().currentRound);
+    }
+
+    public void initType() {
+        System.out.println("GameController: " + Game.getInstance().clientType);
+        if (Game.getInstance().clientType == PlayerType.Banker) {
+            betComboBox.setDisable(true);
+            placeBetButton.setDisable(true);
+            Client.getInstance().getPonterMoveFlag = true;
+        }
     }
 
     @FXML
@@ -128,7 +169,5 @@ public class GameController {
         diceGif2.setImage(img);
         diceGif3.setImage(img);
         playButton.setDisable(true);
-        playersTextArea.setText("");
-        scoreTextArea.setText("");
     }
 }

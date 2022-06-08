@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class MonoThreadClientHandler extends Thread {
     private final Socket clientDialog;
@@ -18,8 +19,13 @@ public class MonoThreadClientHandler extends Thread {
             ObjectInputStream ois = new ObjectInputStream(clientDialog.getInputStream());
             ObjectOutputStream oos = new ObjectOutputStream(clientDialog.getOutputStream());
             oos.reset();
-            if (MultiThreadServer.clientCount == 1) isPonter = true;
             String clientName = ois.readUTF();
+            if (MultiThreadServer.clientCount == 1) {
+                isPonter = true;
+                MultiThreadServer.ponterName = clientName;
+            } else {
+                MultiThreadServer.bankerName = clientName;
+            }
             System.out.println("Connected " + clientName);
             label:
             while (!clientDialog.isClosed() && !clientDialog.isOutputShutdown() && !clientDialog.isOutputShutdown()) {
@@ -88,6 +94,44 @@ public class MonoThreadClientHandler extends Thread {
                         if (isPonter) oos.writeUTF("Ponter");
                         else oos.writeUTF("Banker");
                         oos.reset();
+                        break;
+                    case "getPartnerName":
+                        if (isPonter) oos.writeUTF(MultiThreadServer.bankerName);
+                        else oos.writeUTF(MultiThreadServer.ponterName);
+                        oos.reset();
+                        break;
+                    case "sendPonterMove":
+                        MultiThreadServer.bet = Integer.parseInt(ois.readUTF());
+                        break;
+                    case "sendBankerMove":
+                        MultiThreadServer.numbers.add(Integer.parseInt(ois.readUTF()));
+                        MultiThreadServer.numbers.add(Integer.parseInt(ois.readUTF()));
+                        MultiThreadServer.numbers.add(Integer.parseInt(ois.readUTF()));
+                        break;
+                    case "getBankerMove":
+                        if (MultiThreadServer.numbers.size() == 0) {
+                            oos.writeUTF("0");
+                            oos.writeUTF("0");
+                            oos.writeUTF("0");
+                            oos.reset();
+                        } else {
+                            MultiThreadServer.numbers.forEach(num -> {
+                                try {
+                                    oos.writeUTF(Integer.toString(num));
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                            oos.reset();
+                            MultiThreadServer.numbers.clear();
+                        }
+                        break;
+                    case "getPonterMove":
+                        oos.writeUTF(Integer.toString(MultiThreadServer.bet));
+                        oos.reset();
+                        if (MultiThreadServer.bet != 0) {
+                            MultiThreadServer.bet = 0;
+                        }
                         break;
                     case "quit":
                         break label;

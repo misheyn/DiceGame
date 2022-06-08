@@ -42,31 +42,18 @@ public class Game extends Application {
         Player player = new Player(name, type);
         playerMap.put(player.type.toString(), player);
         System.out.println("Put " + player.type);
-        mainController.getPlayersTextArea().appendText(name + "\n");
+        mainController.getPlayersTextArea().appendText(name + player.type + "\n");
         mainController.getScoreTextArea().appendText(player.score + "\n");
     }
 
     private int generateNumber(ImageView dice) throws FileNotFoundException {
         Random random = new Random();
         int score = random.nextInt(7 - 1) + 1;
-        if (score == 1) {
-            dice.setImage(new Image(new FileInputStream("src/image/dice_1.png")));
-        } else if (score == 2) {
-            dice.setImage(new Image(new FileInputStream("src/image/dice_2.png")));
-        } else if (score == 3) {
-            dice.setImage(new Image(new FileInputStream("src/image/dice_3.png")));
-        } else if (score == 4) {
-            dice.setImage(new Image(new FileInputStream("src/image/dice_4.png")));
-        } else if (score == 5) {
-            dice.setImage(new Image(new FileInputStream("src/image/dice_5.png")));
-        } else {
-            dice.setImage(new Image(new FileInputStream("src/image/dice_6.png")));
-        }
+
         return score;
     }
 
     private void checkWin() {
-
         if (currentRound == 3) {
             if (playerMap.get("Ponter").score > playerMap.get("Banker").score)
                 playerMap.get("Ponter").winStatus = true;
@@ -75,6 +62,7 @@ public class Game extends Application {
             winFlag = true;
         }
     }
+
 
     public void diceRoll() throws Exception {
         mainController.getDiceGif1().setImage(new Image(new FileInputStream("src/image/dice.gif")));
@@ -91,9 +79,7 @@ public class Game extends Application {
             }
             Platform.runLater(() -> {
                 try {
-                    num1 = generateNumber(mainController.getDiceGif1());
-                    num2 = generateNumber(mainController.getDiceGif2());
-                    num3 = generateNumber(mainController.getDiceGif3());
+                    mainController.showResultImage();
                     checkScore();
                     checkWin();
                     if (!winFlag) {
@@ -121,6 +107,12 @@ public class Game extends Application {
             });
         });
         t.start();
+    }
+
+    public void cubeRandomMove() throws FileNotFoundException {
+        num1 = generateNumber(mainController.getDiceGif1());
+        num2 = generateNumber(mainController.getDiceGif2());
+        num3 = generateNumber(mainController.getDiceGif3());
     }
 
     private void showWindow() {
@@ -168,11 +160,8 @@ public class Game extends Application {
         currentRound = 1;
         currentBet = 1;
         winFlag = false;
-        mainController.getDiceGif1().setVisible(false);
-        mainController.getDiceGif2().setVisible(false);
-        mainController.getDiceGif3().setVisible(false);
-        mainController.getBetComboBox().getSelectionModel().select(0);
-        mainController.getRoundTextField().setText("Round " + currentRound);
+        initFlag = true;
+        mainController.restartView();
     }
 
     public static Game getInstance() {
@@ -197,10 +186,12 @@ public class Game extends Application {
     public Scene scene;
     public GameController mainController;
     public static HashMap<String, Player> playerMap;
-    private int currentRound;
+    public int currentRound;
     public int currentBet;
-    private int num1;
-    private int num2;
-    private int num3;
-    private static boolean winFlag;
+    public int num1;
+    public int num2;
+    public int num3;
+    public boolean winFlag = false;
+    public PlayerType clientType;
+    public boolean initFlag = false;
 }
