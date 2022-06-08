@@ -44,6 +44,10 @@ public class StartMenuController {
         StartMenu.getInstance().getStage().close();
     }
 
+    public String getLoginText() {
+        return loginTextField.getText();
+    }
+
     @FXML
     void clickConnectButton(ActionEvent event) {
         alert = new Alert(Alert.AlertType.CONFIRMATION, "Wrong input!\nThink about it ☺", ButtonType.YES);
@@ -71,12 +75,7 @@ public class StartMenuController {
                 startButton.setDisable(true);
                 client.clientFlag = true;
                 client.start();
-                if (Client.getInstance().clientType.equals("Ponter")) {
-                    System.out.println("Ponter");
-                    Game.getInstance().addPlayer(loginTextField.getText(), PlayerType.Ponter);
-                }
-                else Game.getInstance().addPlayer(loginTextField.getText(), PlayerType.Banker);
-                System.out.println(client.clientType);
+
 //                Game.getInstance().mainController.getPlayersTextArea().setText(loginTextField.getText());
 //                Game.getInstance().mainController.addPlayer(loginTextField.getText(), PlayerType.valueOf(typePlayer));
                 if (client.closeFlag) {
@@ -104,7 +103,6 @@ public class StartMenuController {
     @FXML
     void initialize() {
         IPTextField.setText("localhost");
-        Game.getInstance().playerMap = new HashMap<>();
     }
 
     public Alert alert;

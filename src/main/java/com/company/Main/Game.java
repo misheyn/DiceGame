@@ -40,7 +40,8 @@ public class Game extends Application {
 
     public void addPlayer(String name, PlayerType type) {
         Player player = new Player(name, type);
-        playerMap.put(player.type, player);
+        playerMap.put(player.type.toString(), player);
+        System.out.println("Put " + player.type);
         mainController.getPlayersTextArea().appendText(name + "\n");
         mainController.getScoreTextArea().appendText(player.score + "\n");
     }
@@ -155,13 +156,14 @@ public class Game extends Application {
     }
 
     public void initialize() throws Exception {
+        playerMap = new HashMap<>();
         StartMenu.showMenu();
         if (!StartMenu.getInstance().menuController.connectionFlag) {
             addPlayer("Ponter", PlayerType.Ponter);
             addPlayer("Banker", PlayerType.Banker);
             mainController.getTurnTextField().setText("Ponter turn");
         } else {
-            mainController.getTurnTextField().setText(playerMap.get(PlayerType.Ponter).name + " [Ponter] turn");
+            mainController.getTurnTextField().setText(playerMap.get(PlayerType.Ponter.toString()).name + " [Ponter] turn");
         }
         currentRound = 1;
         currentBet = 1;
@@ -194,7 +196,7 @@ public class Game extends Application {
     private static volatile Game instance;
     public Scene scene;
     public GameController mainController;
-    public static Map<PlayerType, Player> playerMap;
+    public static HashMap<String, Player> playerMap;
     private int currentRound;
     public int currentBet;
     private int num1;

@@ -1,5 +1,6 @@
 package com.company;
 
+import com.company.Main.Game;
 import com.company.StartMenu.StartMenu;
 
 import java.io.IOException;
@@ -59,6 +60,13 @@ public class Client extends Thread {
             if (clientCount == 2) {
                 clientFlag = false;
                 StartMenu.getInstance().menuController.getStartButton().setDisable(false);
+                clientType = getClientType();
+                if (clientType.equals("Ponter")) {
+                    System.out.println("Ponter");
+                    Game.getInstance().addPlayer(StartMenu.getInstance().menuController.getLoginText(), PlayerType.Ponter);
+                }
+                else Game.getInstance().addPlayer(StartMenu.getInstance().menuController.getLoginText(), PlayerType.Banker);
+                System.out.println(clientType);
             }
         }
     }
@@ -89,7 +97,6 @@ public class Client extends Thread {
                 System.out.println("Client connected to socket.");
                 oos.writeUTF(login);
                 oos.reset();
-                clientType = getClientType();
 //                readyFlag = true;
                 update();
                 while (!socket.isClosed() && !closeFlag) {
