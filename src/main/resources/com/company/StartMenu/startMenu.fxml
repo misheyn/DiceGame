@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="startAnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.company.StartMenu.StartMenuController">
+   <children>
+      <Button fx:id="startButton" layoutX="425.0" layoutY="434.0" mnemonicParsing="false" onAction="#clickStartButton" prefHeight="38.0" prefWidth="150.0" text="START">
+         <font>
+            <Font name="Consolas Bold" size="18.0" />
+         </font></Button>
+      <TextArea editable="false" focusTraversable="false" prefHeight="175.0" prefWidth="600.0" text="Понтеры делают ставки на любое число от одного до шести. &#10;После этого банкомет одновременно бросает три кости. &#10;Если хотя бы одна из трех костей выпала той гранью, на число которой сделана ставка, &#10;понтер получает выигрыш, равный сумме этой ставки. &#10;Если с поставленным числом совпадает две грани костей, понтер получает двойной выигрыш. &#10;Соответственно, в редком случае тройного совпадения понтеру полагается тройной выигрыш. &#10;Когда же ни одна из костей не покажет заказанного числа, ставка проиграна понтером.&#10;*В данной реализации: &#10;При проигрыше ставки понтером, выигрыш получает банкомет.&#10;Игра ограничена 6 раундами." AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0">
+         <font>
+            <Font name="Consolas" size="12.0" />
+         </font>
+      </TextArea>
+      <Label layoutX="15.0" layoutY="20.0" text="Rules of the game:" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="20.0">
+         <font>
+            <Font name="Consolas Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="15.0" layoutY="250.0" prefHeight="22.0" prefWidth="160.0" text="Online game:">
+         <font>
+            <Font name="Consolas Bold" size="18.0" />
+         </font>
+      </Label>
+      <TextField fx:id="loginTextField" layoutX="76.0" layoutY="317.0" />
+      <TextField fx:id="IPTextField" layoutX="372.0" layoutY="316.0" />
+      <Button fx:id="connectButton" layoutX="224.0" layoutY="365.0" mnemonicParsing="false" onAction="#clickConnectButton" prefHeight="26.0" prefWidth="150.0" text="Connect">
+         <font>
+            <Font name="Consolas Bold" size="14.0" />
+         </font>
+      </Button>
+      <Label layoutX="372.0" layoutY="298.0" text="Enter IP:">
+         <font>
+            <Font name="Consolas" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="77.0" layoutY="298.0" prefHeight="18.0" prefWidth="102.0" text="Enter login:">
+         <font>
+            <Font name="Consolas" size="14.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
